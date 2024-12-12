@@ -11,6 +11,7 @@
           "encoded" => "controller/encoded.php",
           "school" => "controller/school.php",
           "withdrawal" => "controller/withdrawal.php",
+          "profile" => "controller/profile.php",
       ];
       // Assume $rowUser is already defined and populated correctly
       // echo $rowUser['role']; // Consider commenting this out in production

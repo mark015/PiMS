@@ -31,8 +31,11 @@
 <div class="container mt-5">
     <h3>Withdrawal Items</h3>
     <div class="row mb-3 align-items-center">
-        <div class="col-md-10">
+        <div class="col-md-5">
             <input type="text" id="searchInput" class="form-control" placeholder="Search Item Code..." />
+        </div>
+        <div class="col-md-5">
+            <input type="month" id="searchMonth" class="form-control" />
         </div>
         <div class="col-md-2 text-end" id="addBtn">
             <button class="btn btn-primary" id="addBtns" data-bs-toggle="modal" data-bs-target="#addModal"><i class="fa fa-plus"></i></button>

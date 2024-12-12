@@ -20,6 +20,9 @@
     }else if($link == "school"){
       include 'script/school.php'; 
 
+    }else if($link == "profile"){
+      include 'script/profile.php'; 
+
     }
   ?>
   </body>

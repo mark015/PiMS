@@ -4,110 +4,132 @@ $(document).ready(function () {
     let currentPage = 1;
     var role = "<?php echo $rowUser['role'];?>";    
     
-    // Function to fetch and display data
-    function fetchItems(page = 1, search = "") {
-        $.ajax({
-            url: "data/fetch_withdrawal.php",
-            type: "GET",
-            data: { page: page, search: search },
-            dataType: "json",
-            success: function (response) {
-                let rows = "";
-                response.data.forEach(function (item) {
-                    if(role === 'Admin'){
-                        var deleteBtn =  `<button class="btn btn-danger btn-sm delete-btn" data-id="${item.wId}">Delete</button>`
-                    }else {
-                        var deleteBtn = '';
-                    }
+    function fetchItems(page = 1) {
+    const search = $("#searchInput").val();
+    const month = $("#searchMonth").val();
 
-                    rows += `
-                        <tr>
-                            <td>${item.item_code}</td>
-                            <td>${item.item_desc}</td>
-                            <td>${item.wQuantity}</td>
-                            <td>${item.date || "N/A"}</td>
-                            <td>${item.scId || "N/A"}</td>
-                            <td>${item.school_name || "N/A"}</td>
-                            <td>
-                                ${deleteBtn}
-                                <button class="btn btn-success btn-sm" id="update-btn" data-update-id="${item.wId}">Update</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                $("#withdrawalTable tbody").html(rows);
-                
+    $.ajax({
+        url: "data/fetch_withdrawal.php",
+        type: "GET",
+        data: { page: page, search: search, month: month },
+        dataType: "json",
+        success: function (response) {
+            let rows = "";
+            response.data.forEach(function (item) {
+                const deleteBtn = role === 'Admin'
+                    ? `<button class="btn btn-danger btn-sm delete-btn" data-id="${item.wId}">Delete</button>`
+                    : "";
 
-                // Handle pagination
-                const totalPages = Math.ceil(response.total / response.limit);
-                generatePagination(totalPages, response.page);
-            },
-            error: function (xhr, status, error) {
-                console.error("Error fetching data:", error);
-            }
-        });
+                rows += `
+                    <tr>
+                        <td>${item.item_code}</td>
+                        <td>${item.item_desc}</td>
+                        <td>${item.wQuantity}</td>
+                        <td>${item.date || "N/A"}</td>
+                        <td>${item.scId || "N/A"}</td>
+                        <td>${item.school_name || "N/A"}</td>
+                        <td>
+                            ${deleteBtn}
+                            <button class="btn btn-success btn-sm" id="update-btn" data-update-id="${item.wId}">Update</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            $("#withdrawalTable tbody").html(rows);
+
+            // Handle pagination
+            const totalPages = Math.ceil(response.total / response.limit);
+            generatePagination(totalPages, response.page);
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+}
+
+// Event listeners for search and month input
+$("#searchInput").on("keyup", function () {
+    fetchItems(1); // Reset to page 1 when searching
+});
+
+$("#searchMonth").on("change", function () {
+    fetchItems(1); // Reset to page 1 when selecting a month
+});
+
+// Generate pagination buttons
+function generatePagination(totalPages, currentPage) {
+    let pagination = "";
+
+    // Previous button
+    if (currentPage > 1) {
+        pagination += `
+            <li class="page-item">
+                <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+            </li>
+        `;
+    } else {
+        pagination += `
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+        `;
     }
-    // Function to generate pagination buttons
-    function generatePagination(totalPages, currentPage) {
-        let pagination = "";
 
-        // Previous button
-        if (currentPage > 1) {
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
             pagination += `
-                <li class="page-item">
-                    <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                <li class="page-item ${i === currentPage ? "active" : ""}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
                 </li>
             `;
-        } else {
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
             pagination += `
                 <li class="page-item disabled">
-                    <span class="page-link">Previous</span>
+                    <span class="page-link">...</span>
                 </li>
             `;
         }
-
-        // Generate page numbers
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                pagination += `
-                    <li class="page-item ${i === currentPage ? "active" : ""}">
-                        <a class="page-link" href="#" data-page="${i}">${i}</a>
-                    </li>
-                `;
-            } else if (i === currentPage - 2 || i === currentPage + 2) {
-                pagination += `
-                    <li class="page-item disabled">
-                        <span class="page-link">...</span>
-                    </li>
-                `;
-            }
-        }
-
-        // Next button
-        if (currentPage < totalPages) {
-            pagination += `
-                <li class="page-item">
-                    <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
-                </li>
-            `;
-        } else {
-            pagination += `
-                <li class="page-item disabled">
-                    <span class="page-link">Next</span>
-                </li>
-            `;
-        }
-
-        $("#pagination").html(pagination);
-
-        // Attach click event to pagination buttons
-        $("#pagination .page-link").click(function (e) {
-            e.preventDefault();
-            const page = $(this).data("page");
-            const search = $("#searchInput").val();
-            fetchItems(page, search);
-        });
     }
+
+    // Next button
+    if (currentPage < totalPages) {
+        pagination += `
+            <li class="page-item">
+                <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+            </li>
+        `;
+    } else {
+        pagination += `
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        `;
+    }
+
+    $("#pagination").html(pagination);
+
+    // Attach click event to pagination buttons
+    $("#pagination .page-link").click(function (e) {
+        e.preventDefault();
+        const page = $(this).data("page");
+        fetchItems(page);
+    });
+}
+
+    // Attach keyup event to search input
+    $("#searchInput").on("keyup", function () {
+        const search = $(this).val();
+        const month = $("#searchMonth").val();
+        fetchItems(1, search, month);
+    });
+
+    // Attach change event to month input
+    $("#searchMonth").on("change", function () {
+        const month = $(this).val();
+        const search = $("#searchInput").val();
+        fetchItems(1, search, month);
+    });
 
    // Fetch suggestions dynamically
     $('#itemCode').on('keyup', function () {

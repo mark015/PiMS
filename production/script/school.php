@@ -166,7 +166,7 @@ $(document).ready(function () {
             data: { id: schoolId },
             dataType: "json",
             success: function (response) {
-                console.log(response)
+               
                 if (response.success) {
                     $("#scId").val(response.data.id);
                     $("#schoolId").val(response.data.school_id);
